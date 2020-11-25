@@ -6,28 +6,36 @@ export enum PointState {
 
 export default class SyncMap extends Map<number, number> {
     
-  public getFirstValue() {
-    return this.values().next().value
-  }
-  public findCurrentSyncPoint(time: number): number {
-    let prev: number = PointState.NOT_FOUND;
-    for (const key of this.keys()) {
-      if (key < time) prev = key;
+  public findSyncPoint(time: number): [number, number] | undefined {
+    let prev: [number, number] | undefined = undefined;
+    for (const point of this.entries()) {
+      if (point[0] <= time) prev = point;
       else break;
     }
     return prev;
   }
 
-  public findOriginalTime(reactionTime: number) {
-    console.log("time", reactionTime);
-    const key = this.findCurrentSyncPoint(reactionTime);
-    console.log("key", key)
-    if (key === PointState.NOT_FOUND) return PointState.UNSTARTED;
-    const originalTimePoint = this.get(key) || 0;
-    console.log("originalTimePoint", originalTimePoint);
-    if(originalTimePoint < 0 ) return originalTimePoint;
-    const offset = reactionTime - key;
-    console.log("offset", offset);
-    return originalTimePoint + offset;
+  public findNextTimeout = (time:number) =>{
+    const syncPoints = Array.from(this.entries());
+    const nextKeyIndex = syncPoints.findIndex(
+      ([key, val]) => key > time
+    );
+    if (nextKeyIndex < 0) return { key:PointState.NOT_FOUND, timeout:-1};
+    const nextKey = syncPoints[nextKeyIndex]?.[0];
+    let timeout = nextKey ? nextKey - time : -1;
+    console.log({nextKey, timeout});
+
+    return {key: nextKey, timeout};
   }
+
+  public findOriginalTime(reactionTime: number) {
+    const currentSyncPoint = this.findSyncPoint(reactionTime);
+    console.log({currentSyncPoint});
+    if(!currentSyncPoint) return PointState.NOT_FOUND;
+    const [key, value] = currentSyncPoint;
+    if(value < 0) return value;
+    const offset = reactionTime - key;
+    return value + offset;
+  }
+  
 }

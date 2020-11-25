@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Slider } from "@material-ui/core";
+import formatTime from "../utils/formatVideoTime";
 
 interface Props {
   duration: number;
@@ -45,6 +46,8 @@ const Seekbar: FunctionComponent<Props> = ({
       step={0.5}
       max={duration}
       value={time}
+      valueLabelDisplay="auto"
+      valueLabelFormat={formatTime}
       onChangeCommitted={(e, value) => onLocalChangeCommited(getValue(value))}
       onChange={(e, value) => onLocalChange(getValue(value))}
     />

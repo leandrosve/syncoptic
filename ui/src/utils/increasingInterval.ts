@@ -1,13 +1,13 @@
-const increasingInterval = (fn:()=>boolean, time:number, increment:(previousValue:number)=>number):void =>{
+const increasingInterval = (fn:()=>boolean | Promise<boolean>, time:number, increment:(previousValue:number)=>number):void =>{
   
- let cont = true;
+ let stop = false;
   
-  const next = (i:number)=> {
-    cont= fn();
-    if(cont) setTimeout(next, i, increment(i));
+  const next = async (i:number)=> {
+    stop= await fn();
+    console.log({stop});
+    if(!stop) setTimeout(next, i, increment(i));
   }
-  
-  setTimeout(next, time, time);
+  next(time);
 }
 
 
