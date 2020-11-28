@@ -1,17 +1,21 @@
 import React, { useRef, useState } from "react";
-import "./App.css";
-import YouTube, { Options } from "react-youtube";
-import useYoutubeVideo from "./hooks/useYoutubeVideo";
-import { colors, Grid, IconButton} from "@material-ui/core";
-import Controls from "./components/Controls";
-import { createMuiTheme, makeStyles, ThemeProvider, withStyles } from "@material-ui/core/styles";
+import "../App.css";
+import YouTube from "react-youtube";
+import useYoutubeVideo from "../hooks/useYoutubeVideo";
+import { Grid, IconButton } from "@material-ui/core";
+import Controls from "./controls/Controls";
+import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import SwapHorizIcon from "@material-ui/icons/SwapHoriz";
+import YoutubeContainer from "./YouTubeContainer";
 
 const darkTheme = createMuiTheme({
   palette: {
     primary: {
       main: "#d80202",
+    },
+    background:{
+      default:"#181818"
     },
     type: "dark",
   },
@@ -31,8 +35,6 @@ const lightTheme = createMuiTheme({
   },
 });
 */
-
-
 
 function App() {
   const reactionRef = useRef<YouTube>(null);
@@ -57,19 +59,28 @@ function App() {
         <div className="App">
           <Grid container spacing={3} style={{ flexDirection: direction }}>
             <Grid item xs={6}>
-              <h2>Reaction</h2>   
-                <YouTube videoId="QVv2XWOttIA" ref={reactionRef} />
+              <h2>Reaction</h2>
+                <YoutubeContainer
+                  videoId="QVv2XWOttIA"          
+                  playerRef={reactionRef}
+                />
             </Grid>
             <Grid item xs={6}>
               <h2>Original</h2>
-              <YouTube videoId="XduXpTx24hY" ref={originalRef}/>
+                <YoutubeContainer
+                  videoId="XduXpTx24hY"
+                  playerRef={originalRef}
+                />
             </Grid>
           </Grid>
           <IconButton onClick={switchPositions}>
             <SwapHorizIcon />
           </IconButton>
           <div style={{ width: "80%" }}>
-            <Controls reactionPlayer={reactionPlayer} originalPlayer={originalPlayer}/>
+            <Controls
+              reactionPlayer={reactionPlayer}
+              originalPlayer={originalPlayer}
+            />
           </div>
         </div>
       </CssBaseline>

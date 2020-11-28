@@ -1,6 +1,7 @@
-import { Button, IconButton } from "@material-ui/core";
+import {IconButton } from "@material-ui/core";
 import React, {
   FunctionComponent,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -8,9 +9,9 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
 import SyncIcon from "@material-ui/icons/Sync";
 import Seekbar from "./Seekbar";
-import formatTime from "../utils/formatVideoTime";
-import SyncMap, { PointState } from "../utils/SyncMap";
-import useControls from "../hooks/useControls";
+import formatTime from "../../utils/formatVideoTime";
+import SyncMap, { PointState } from "../../utils/SyncMap";
+import useControls from "../../hooks/useControls";
 
 interface Props {
   reactionPlayer: YT.Player | undefined;
@@ -24,10 +25,28 @@ const Controls: FunctionComponent<Props> = ({
   reactionPlayer,
   originalPlayer,
 }) => {
+  
+  const [timeMarker, setTimeMarker] = useState<number>(0);
 
+  const updateTimeMark = useCallback(async() => {
+      const t = await reactionPlayer?.getCurrentTime();
+      setTimeMarker(t || 0);
+      return t;
+    }, [setTimeMarker, reactionPlayer]);
  
-
-  const {isPlaying, togglePlay, currentTime, duration, reSync} = useControls(reactionPlayer, originalPlayer, syncMap);
+  const {isPlaying, togglePlay, duration, reSync} = useControls(reactionPlayer, originalPlayer, syncMap);
+  
+  /** update time mark state */
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (reactionPlayer && isPlaying) {
+      interval = setInterval(async () => {
+        updateTimeMark();
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [reactionPlayer, isPlaying, updateTimeMark]);
+  
   return (
     <div>
       <IconButton onClick={togglePlay}>
@@ -37,11 +56,11 @@ const Controls: FunctionComponent<Props> = ({
         <SyncIcon />
       </IconButton>
       <Seekbar
-        currentTime={currentTime}
+        currentTime={timeMarker}
         duration={duration}
         onChange={(time) => reSync(time)}
       />
-      <span>{formatTime(currentTime)}</span>
+      <span>{formatTime(timeMarker)}</span>
     </div>
   );
 };

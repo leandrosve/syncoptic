@@ -7,7 +7,7 @@ const increasingInterval = (fn:()=>boolean | Promise<boolean>, time:number, incr
     console.log({stop});
     if(!stop) setTimeout(next, i, increment(i));
   }
-  next(time);
+  setTimeout(next, time, time);
 }
 
 
