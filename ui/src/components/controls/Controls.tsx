@@ -1,17 +1,16 @@
-import {IconButton } from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
+import SyncIcon from "@material-ui/icons/Sync";
 import React, {
   FunctionComponent,
   useCallback,
   useEffect,
-  useState,
+  useState
 } from "react";
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import PauseIcon from "@material-ui/icons/Pause";
-import SyncIcon from "@material-ui/icons/Sync";
-import Seekbar from "./Seekbar";
+import useControls from "../../hooks/useControls";
 import formatTime from "../../utils/formatVideoTime";
 import SyncMap, { PointState } from "../../utils/SyncMap";
-import useControls from "../../hooks/useControls";
+import TogglePlayButton from "./buttons/TogglePlayButton";
+import Seekbar from "./Seekbar";
 
 interface Props {
   reactionPlayer: YT.Player | undefined;
@@ -34,7 +33,7 @@ const Controls: FunctionComponent<Props> = ({
       return t;
     }, [setTimeMarker, reactionPlayer]);
  
-  const {isPlaying, togglePlay, duration, reSync} = useControls(reactionPlayer, originalPlayer, syncMap);
+  const {isPlaying, togglePlay, duration, isLoading, reSync} = useControls(reactionPlayer, originalPlayer, syncMap);
   
   /** update time mark state */
   useEffect(() => {
@@ -48,10 +47,9 @@ const Controls: FunctionComponent<Props> = ({
   }, [reactionPlayer, isPlaying, updateTimeMark]);
   
   return (
-    <div>
-      <IconButton onClick={togglePlay}>
-        {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
-      </IconButton>
+    <div style={{width:"60%"}}>
+      <TogglePlayButton isLoading={isLoading} isPlaying={isPlaying} togglePlay={togglePlay}/>
+     
       <IconButton onClick={() => reSync()}>
         <SyncIcon />
       </IconButton>

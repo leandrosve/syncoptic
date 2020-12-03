@@ -1,90 +1,34 @@
-import React, { useRef, useState } from "react";
-import "../App.css";
-import YouTube from "react-youtube";
-import useYoutubeVideo from "../hooks/useYoutubeVideo";
-import { Grid, IconButton } from "@material-ui/core";
-import Controls from "./controls/Controls";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import SwapHorizIcon from "@material-ui/icons/SwapHoriz";
-import YoutubeContainer from "./YouTubeContainer";
-
-const darkTheme = createMuiTheme({
-  palette: {
-    primary: {
-      main: "#d80202",
-    },
-    background:{
-      default:"#181818"
-    },
-    type: "dark",
-  },
-});
-
-/*
-const lightTheme = createMuiTheme({
-  palette: {
-    primary: {
-      main: "#d80202",
-    },
-    background:{
-      default:"#f9f9f9"
-    },
-
-    type: "light",
-  },
-});
-*/
+import { MuiThemeProvider } from "@material-ui/core/styles";
+import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import "../assets/App.css";
+import useCurrentTheme from "../hooks/useCurrentTheme";
+import Editor from "./editor/Editor";
+import Navbar from "./layout/Navbar";
+import Watch from "./watch/Watch";
+import Welcome from "./Welcome";
 
 function App() {
-  const reactionRef = useRef<YouTube>(null);
-
-  const reactionPlayer = useYoutubeVideo(reactionRef);
-
-  const originalRef = useRef<YouTube>(null);
-
-  const originalPlayer = useYoutubeVideo(originalRef);
-
-  const [direction, setDirection] = useState<"row" | "row-reverse">("row");
-  const switchPositions = () => {
-    setDirection((prev) => {
-      if (prev === "row") return "row-reverse";
-      return "row";
-    });
-  };
+  const { theme, switchTheme, themeName } = useCurrentTheme();
 
   return (
-    <ThemeProvider theme={darkTheme}>
+    <MuiThemeProvider theme={theme}>
       <CssBaseline>
         <div className="App">
-          <Grid container spacing={3} style={{ flexDirection: direction }}>
-            <Grid item xs={6}>
-              <h2>Reaction</h2>
-                <YoutubeContainer
-                  videoId="QVv2XWOttIA"          
-                  playerRef={reactionRef}
-                />
-            </Grid>
-            <Grid item xs={6}>
-              <h2>Original</h2>
-                <YoutubeContainer
-                  videoId="XduXpTx24hY"
-                  playerRef={originalRef}
-                />
-            </Grid>
-          </Grid>
-          <IconButton onClick={switchPositions}>
-            <SwapHorizIcon />
-          </IconButton>
-          <div style={{ width: "80%" }}>
-            <Controls
-              reactionPlayer={reactionPlayer}
-              originalPlayer={originalPlayer}
-            />
-          </div>
+          <Router>
+            <Navbar theme={themeName} switchTheme={switchTheme} />
+       
+              <Switch>
+                <Route path="/" exact component={Welcome}></Route>
+                <Route path="/create" exact component={Editor} />
+                <Route path="/watch" exact component={Watch} />
+              </Switch>
+         
+          </Router>
         </div>
       </CssBaseline>
-    </ThemeProvider>
+    </MuiThemeProvider>
   );
 }
 

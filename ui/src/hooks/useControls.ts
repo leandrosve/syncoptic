@@ -23,6 +23,8 @@ const useControls = (
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const [nextTimeout, setNextTimeout] = useState<
     { key: number; timeout: number } | undefined
   >();
@@ -66,6 +68,7 @@ const useControls = (
       if (await isPlayerReady(reactionPlayer)) {
         reactionPlayer.playVideo();
         setNextTimeout(syncMap.findNextTimeout(reactionTime));
+        setIsLoading(false);
         return true; //exit
       }
       return false;
@@ -92,6 +95,7 @@ const useControls = (
                 reactionPlayer.playVideo(),
               ]);
             setNextTimeout(syncMap.findNextTimeout(reactionTime));
+            setIsLoading(false);
           }
           return true;
         }
@@ -107,7 +111,7 @@ const useControls = (
       }
       return false;
     },
-    [reactionPlayer, originalPlayer, syncMap]
+    [reactionPlayer, originalPlayer, syncMap, setIsLoading]
   );
 
   const prepareSync = useCallback(
@@ -155,6 +159,7 @@ const useControls = (
   const reSync = useCallback(
  
     async (reactionTime?: number) => {
+      setIsLoading(true);
       setNextTimeout(undefined);//cancelar el timeout previo  
       console.log({ time: reactionTime });
       await reactionPlayer?.pauseVideo();
@@ -167,7 +172,7 @@ const useControls = (
       await prepareSync(reactionTime, originalTime);
       setIsPlaying(true);
     },
-    [reactionPlayer, setIsPlaying, prepareSync, syncMap]
+    [reactionPlayer, setIsPlaying, prepareSync, syncMap, setIsLoading]
   );
 
   /** set next timeout */
@@ -200,6 +205,7 @@ const useControls = (
     isPlaying,
     duration: reactionDuration,
     togglePlay,
+    isLoading,
     reSync,
   };
 };

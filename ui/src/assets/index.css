@@ -1,0 +1,16 @@
+body, html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Open Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a, a:link, a:visited, a:hover, a:active{
+  text-decoration: none;
+}
+
