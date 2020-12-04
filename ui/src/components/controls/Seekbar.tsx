@@ -20,7 +20,16 @@ const StyledSlider = withStyles({
     height: "10px",
   },
   thumb: {
-    opacity: "0",
+    opacity:"0",
+    height: "15px",
+    width:"15px",
+    bottom:"2px",
+  },
+  valueLabel:{
+    marginLeft:"3px"
+  },
+  active:{
+    opacity:"1",
   },
   mark: {
     height: "10px",
@@ -29,6 +38,9 @@ const StyledSlider = withStyles({
   },
   markLabel: {
     marginLeft:"2px"
+  },
+  markActive :{
+    opacity:1,
   }
 })(Slider);
 

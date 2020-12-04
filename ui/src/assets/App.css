@@ -5,11 +5,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-
 }
-
-
 
 a,
 a:link,
@@ -95,9 +91,19 @@ a:active {
   align-items: center;
 }
 
-
 .flexVertical {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.floatingControls {
+  z-index: 1501;
+  width: 50%;
+  padding: 5px 20px;
+  position: absolute;
+  top: 20;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
 }

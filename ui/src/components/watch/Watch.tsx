@@ -47,10 +47,12 @@ const Watch = () => {
         </Grid>
       </Grid>
       <SwapButton onClick={switchPositions}/>
-      <Controls
-        reactionPlayer={reactionPlayer}
-        originalPlayer={originalPlayer}
-      />
+      <div style={{width:"60%"}}>
+        <Controls
+          reactionPlayer={reactionPlayer}
+          originalPlayer={originalPlayer}
+        />
+      </div>
       
     </>
   );

@@ -5,13 +5,13 @@ const playerOptions: Options = {
   playerVars: { disablekb: 0, rel: 0, showinfo: 0 , autoplay:0},
 };
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement>{
   videoId?: string;
   playerRef: RefObject<YouTube>;
 }
-const YouTubeContainer: FunctionComponent<Props> = ({ videoId, playerRef }) => {
+const YouTubeContainer: FunctionComponent<Props> = ({ videoId, playerRef, ...props}) => {
   return (
-      <div className="youtube-player-wrapper">
+      <div className="youtube-player-wrapper" {...props}>
         <YouTube
           className="youtube-player"
           videoId={videoId}

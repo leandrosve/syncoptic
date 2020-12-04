@@ -12,7 +12,7 @@ import SyncMap, { PointState } from "../../utils/SyncMap";
 import TogglePlayButton from "./buttons/TogglePlayButton";
 import Seekbar from "./Seekbar";
 
-interface Props {
+export interface ControlsProps {
   reactionPlayer: YT.Player | undefined;
   originalPlayer: YT.Player | undefined;
 }
@@ -20,7 +20,7 @@ interface Props {
 //const syncMap = new SyncMap([[51.4, 0], [60, PointState.PAUSED], [70, 70-51.4], [80, PointState.PAUSED],[90, 90-51.4]]);
 
 const syncMap = new SyncMap([[170, 0], [185,0],[189,PointState.PAUSED], [235, 17.5], [252, PointState.PAUSED], [254, 24.6], [341.5, -3], [343.7, 112]]);
-const Controls: FunctionComponent<Props> = ({
+const Controls: FunctionComponent<ControlsProps> = ({
   reactionPlayer,
   originalPlayer,
 }) => {
@@ -47,7 +47,7 @@ const Controls: FunctionComponent<Props> = ({
   }, [reactionPlayer, isPlaying, updateTimeMark]);
   
   return (
-    <div style={{width:"60%"}}>
+    <div >
       <TogglePlayButton isLoading={isLoading} isPlaying={isPlaying} togglePlay={togglePlay}/>
      
       <IconButton onClick={() => reSync()}>
