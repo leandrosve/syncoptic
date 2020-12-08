@@ -1,6 +1,7 @@
 import { Grid } from "@material-ui/core";
 import React, { useRef, useState } from "react";
 import YouTube from "react-youtube";
+import { syncMap } from "../../data/syncMaps";
 import useRandomThumbnail from "../../hooks/useRandomThumbnail";
 import useYoutubeVideo from "../../hooks/useYoutubeVideo";
 import SwapButton from "../controls/buttons/SwapButton";
@@ -51,6 +52,7 @@ const Watch = () => {
         <Controls
           reactionPlayer={reactionPlayer}
           originalPlayer={originalPlayer}
+          syncMap={syncMap}
         />
       </div>
       

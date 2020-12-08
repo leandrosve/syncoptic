@@ -7,12 +7,16 @@ interface Props {
   currentTime: number;
   onChange: (time: number) => void;
   step?:number;
+  marks?:Iterable<number>;
 }
 
 const getValue = (value: number | Array<number>): number =>
   value instanceof Array ? value[0] : value;
 
-const StyledSlider = withStyles({
+const StyledSlider = withStyles(({palette}) =>({
+  root:{
+    marginBottom:"5px",
+  },
   rail: {
     height: "10px",
   },
@@ -20,21 +24,24 @@ const StyledSlider = withStyles({
     height: "10px",
   },
   thumb: {
-    opacity:"0",
+    display:"hidden",
     height: "15px",
     width:"15px",
     bottom:"2px",
   },
   valueLabel:{
-    marginLeft:"3px"
+    marginLeft:"-7px",
+    padding:"0px 10px",
+    background:palette.primary.main,
   },
   active:{
-    opacity:"1",
+    display:"visible"
   },
   mark: {
-    height: "10px",
+    height: "15px",
     background:"white",
-    width: "5px",
+    width: "4px",
+    boxShadow:"1px 1px 2px black"
   },
   markLabel: {
     marginLeft:"2px"
@@ -42,33 +49,15 @@ const StyledSlider = withStyles({
   markActive :{
     opacity:1,
   }
-})(Slider);
-
-const marks = [
-  {
-    value: 0,
-    label: '1',
-  },
-  {
-    value: 20,
-    label: '2',
-  },
-  {
-    value: 37,
-    label: '3',
-  },
-  {
-    value: 50,
-    label: '4',
-  },
-];
+}))(Slider);
 
 
 const Seekbar: FunctionComponent<Props> = ({
   duration,
   currentTime,
   onChange,
-  step=0.5
+  step=0.5,
+  marks=[]
 }) => {
   const [time, setTime] = useState<number>(0);
 
@@ -80,8 +69,6 @@ const Seekbar: FunctionComponent<Props> = ({
   };
 
   const onLocalChangeCommited = (value: number) => {
-    console.log("===============================");
-    console.log("value", value);
     onChange(getValue(value));
     setTimeout(() => setIsActive(false), 300);
   };
@@ -96,7 +83,7 @@ const Seekbar: FunctionComponent<Props> = ({
     <StyledSlider
       step={step}
       max={duration}
-      marks={marks}
+      marks={Array.from(marks).map((value, label) => ({value, label }))}
       value={time}
       valueLabelDisplay="auto"
       valueLabelFormat={formatTime}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PlayerState from "../enums/PlayerState";
 import increasingInterval from "../utils/increasingInterval";
-import SyncMap from "../utils/SyncMap";
+import SyncMap, { PointState, TimeInfo } from "../utils/SyncMap";
 import timeout from "../utils/timeout";
 
 const getPlayerState = async (player: YT.Player) =>
@@ -16,10 +16,10 @@ const incrementTimeout = (prev: number) => (prev < 5000 ? prev + 200 : 5000);
 const useControls = (
   reactionPlayer: YT.Player | undefined,
   originalPlayer: YT.Player | undefined,
-  syncMap: SyncMap
+  syncMap: SyncMap,
+  autoPlay?:boolean,
 ) => {
   const [reactionDuration, setReactionDuration] = useState<number>(0);
-  const [originalDuration, setOriginalDuration] = useState<number>(0);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
@@ -42,21 +42,11 @@ const useControls = (
     });
   };
 
-  const setUp = async (
-    setReactionDuration: (val: number) => void,
-    setOriginalDuration: (val: number) => void,
-    reactionPlayer?: YT.Player,
-    originalPlayer?: YT.Player
-  ) => {
-    if (reactionPlayer && originalPlayer) {
-      setReactionDuration(await reactionPlayer.getDuration());
-      setOriginalDuration(await originalPlayer.getDuration());
-      await reactionPlayer.seekTo(0.2, true);
-      reactionPlayer?.unMute();
-      await originalPlayer.seekTo(0.2, true);
-      originalPlayer?.unMute();
-    }
-  };
+
+  const cleanUp = useCallback(async ()=>{
+    reactionPlayer?.pauseVideo();
+    originalPlayer?.pauseVideo();
+  },[reactionPlayer, originalPlayer])
 
   const tryResumeReactionOnly = useCallback(
     async (reactionTime) => {
@@ -81,7 +71,7 @@ const useControls = (
       if (reactionTime < 0 || !reactionPlayer || !originalPlayer) return true;
 
       console.log("entro aca papi");
-
+      const nextTimeout = syncMap.findNextTimeout(reactionTime);
       let secondCheck = false;
       const oneTry = async () => {
         if (
@@ -94,7 +84,7 @@ const useControls = (
                 originalPlayer.playVideo(),
                 reactionPlayer.playVideo(),
               ]);
-            setNextTimeout(syncMap.findNextTimeout(reactionTime));
+            setNextTimeout(nextTimeout);
             setIsLoading(false);
           }
           return true;
@@ -117,15 +107,16 @@ const useControls = (
   const prepareSync = useCallback(
     async (
       reactionTime: number,
-      originalTime: number,
+      originalTime: TimeInfo,
       nextOriginalTime?: number
     ) => {
       await originalPlayer?.pauseVideo();
-      originalTime = originalTime < originalDuration ? originalTime : -1;
-      console.log(originalTime);
+
       if (reactionPlayer && originalPlayer) {
-        if (originalTime < 0) {
-          originalPlayer.pauseVideo();
+        if (originalTime.state !== PointState.PLAYING) {
+        
+          await originalPlayer.pauseVideo();
+          originalPlayer.seekTo(originalTime.time, true);
           increasingInterval(
             async () => await tryResumeReactionOnly(reactionTime),
             500,
@@ -135,7 +126,7 @@ const useControls = (
           await originalPlayer.pauseVideo();
           await reactionPlayer.pauseVideo();
           await reactionPlayer.seekTo(reactionTime, true);
-          await originalPlayer.seekTo(originalTime || nextOriginalTime || 0, true);     
+          await originalPlayer.seekTo(originalTime.time || nextOriginalTime || 0, true);     
           await originalPlayer.pauseVideo();
           await reactionPlayer.pauseVideo();
           
@@ -149,7 +140,6 @@ const useControls = (
     },
     [
       reactionPlayer,
-      originalDuration,
       originalPlayer,
       tryResumeOnSync,
       tryResumeReactionOnly,
@@ -162,7 +152,7 @@ const useControls = (
       setIsLoading(true);
       setNextTimeout(undefined);//cancelar el timeout previo  
       console.log({ time: reactionTime });
-      await reactionPlayer?.pauseVideo();
+     // await reactionPlayer?.pauseVideo();
       reactionTime =
         reactionTime !== undefined && reactionTime >= 0
           ? reactionTime
@@ -175,13 +165,23 @@ const useControls = (
     [reactionPlayer, setIsPlaying, prepareSync, syncMap, setIsLoading]
   );
 
+
+
+  const setUp = useCallback(async () => {
+    if (reactionPlayer && originalPlayer) {
+      setReactionDuration(await reactionPlayer.getDuration());
+      reactionPlayer?.unMute();
+      originalPlayer?.unMute();
+      if(autoPlay) reSync();
+    }
+  },[setReactionDuration, reactionPlayer, originalPlayer, autoPlay, reSync]);
   /** set next timeout */
   useEffect(() => {
     if (nextTimeout) {
       const { key, timeout } = nextTimeout;
       if (timeout < 0) return;
       console.log({ nextTimeout });
-      const timeoutID = setTimeout(() => reSync(key), timeout * 1000);
+      const timeoutID = setTimeout(() => reSync(key), timeout * 1000 );
 
       return () => {
         console.log("cleared the timeout");
@@ -192,14 +192,10 @@ const useControls = (
 
   useEffect(() => {
     if (reactionPlayer && originalPlayer) {
-      setUp(
-        setReactionDuration,
-        setOriginalDuration,
-        reactionPlayer,
-        originalPlayer
-      );
+      setUp();
+      return ()=>{cleanUp()};
     }
-  }, [reactionPlayer, originalPlayer]);
+  }, [reactionPlayer, originalPlayer, setUp, cleanUp]);
 
   return {
     isPlaying,

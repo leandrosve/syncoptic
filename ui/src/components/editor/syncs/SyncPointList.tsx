@@ -10,12 +10,15 @@ import ArrowRightAltIcon from "@material-ui/icons/ArrowRightAlt";
 import DeleteIcon from "@material-ui/icons/Delete";
 import PauseCircleOutlineIcon from "@material-ui/icons/PauseCircleOutline";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useCallback } from "react";
 import formatTime from "../../../utils/formatVideoTime";
+import SyncMap, { PointState } from "../../../utils/SyncMap";
 
 const styles = {
   list: {
     maxHeight: "50vh",
+    display: "flex",
+    "flex-direction":"column-reverse",
     "overflow-y": "auto",
   },
   itemText: {
@@ -31,16 +34,21 @@ const styles = {
   },
 };
 interface Props {
-  syncPoints: number[][];
+  syncMaps: SyncMap;
+  removeSync:(reactionTime:number) => any;
+  startPreview:(reactionTime:number) => any;
+  onItemClick:(reactionTime:number) => any;
 }
-const SyncPointList: FunctionComponent<Props> = ({ syncPoints }) => {
+const SyncPointList: FunctionComponent<Props> = ({ syncMaps, removeSync, startPreview, onItemClick}) => {
+
   return (
     <List component="nav" style={styles.list}>
-      {syncPoints.map(([key, value], index) => (
+      {syncMaps.getAsArray().map(([key, value], index) => (
         <ListItem
           key={key}
           aria-haspopup="true"
           aria-controls="lock-menu"
+          onClick={()=>onItemClick(key)}
           button
         >
           <Chip
@@ -52,17 +60,17 @@ const SyncPointList: FunctionComponent<Props> = ({ syncPoints }) => {
           <IconButton
             size="small"
             edge="start"
-            onClick={(e) => e.stopPropagation()}
+            onClick={() =>startPreview(key)}
           >
             <PlayArrowIcon fontSize="small" />
           </IconButton>
 
           <Typography variant="button" style={styles.itemText} align="center">
             {formatTime(key)} <ArrowRightAltIcon />{" "}
-            {value < 0 ? <PauseCircleOutlineIcon /> : formatTime(value)}
+            {formatTime(value.time)} {value.state === PointState.PAUSED && <PauseCircleOutlineIcon />}
           </Typography>
           <ListItemSecondaryAction>
-            <IconButton size="small" edge="end" aria-label="delete">
+            <IconButton size="small" edge="end" aria-label="delete" onClick={()=>removeSync(key)}>
               <DeleteIcon fontSize="small" />
             </IconButton>
           </ListItemSecondaryAction>

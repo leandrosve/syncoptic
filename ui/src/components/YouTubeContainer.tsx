@@ -12,12 +12,15 @@ interface Props extends React.HTMLAttributes<HTMLDivElement>{
 const YouTubeContainer: FunctionComponent<Props> = ({ videoId, playerRef, ...props}) => {
   return (
       <div className="youtube-player-wrapper" {...props}>
-        <YouTube
+        
+          <YouTube
           className="youtube-player"
           videoId={videoId}
           opts={playerOptions}
           ref={playerRef}
         />
+        
+        
       </div>
   );
 };

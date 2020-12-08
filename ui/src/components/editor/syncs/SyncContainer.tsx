@@ -10,22 +10,12 @@ import {
 } from "@material-ui/core";
 import Add from "@material-ui/icons/Add";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import React, { useState } from "react";
-import { PointState } from "../../../utils/SyncMap";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import SyncMap, { PointState, TimeInfo } from "../../../utils/SyncMap";
 import ContainerButtons from "./ContainerButtons";
 import SyncPointForm from "./SyncPointForm";
 import SyncPointList from "./SyncPointList";
 
-const syncPoints = [
-  [170, 0],
-  [185, 0],
-  [189, PointState.PAUSED],
-  [235, 17.5],
-  [252, PointState.PAUSED],
-  [254, 24.6],
-  [341.5, -3],
-  [343.7, 112],
-];
 
 const StyledPaper = withStyles(({ palette }) => ({
   root: {
@@ -38,12 +28,21 @@ const StyledPaper = withStyles(({ palette }) => ({
   },
 }))(Paper);
 
-const SyncContainer = () => {
+interface Props{
+  syncMap:SyncMap;
+  removeSync:(reactionTime:number) => any;
+  startPreview:(reactionTime:number) => any;
+  addSync:(reactionTime:number, originalTime:TimeInfo) => any;
+}
+
+const SyncContainer:FunctionComponent<Props> = ({syncMap, removeSync, startPreview, addSync}) => {
   const [position, setPosition] = useState<"right" | "left">("right");
 
   const [expanded, setExpanded] = useState<boolean>(true);
 
   const [openForm, setOpenForm] = useState<boolean>(true);
+
+  const [selectedItem, setSelectedItem] = useState<[number, TimeInfo] | undefined>();
 
   const switchPosition = () => {
     setPosition((prev) => (prev === "right" ? "left" : "right"));
@@ -60,6 +59,18 @@ const SyncContainer = () => {
       return !prev;
     });
   };
+
+  const selectItem= (reactionTime:number) =>{
+    setOpenForm(true);
+    const timeInfo = syncMap.get(reactionTime);
+    if(timeInfo)
+      setSelectedItem([reactionTime, timeInfo]);
+  }
+
+
+  useEffect(()=>{
+    setExpanded(true);
+  },[syncMap, setExpanded])
 
   return (
     <Snackbar
@@ -96,14 +107,14 @@ const SyncContainer = () => {
             <>
               {openForm && (
                 <>
-                  <SyncPointForm />{" "}
+                  <SyncPointForm addSync={addSync} defaultData={selectedItem}/>{" "}
                   <Button onClick={switchOpenForm} fullWidth>
                     <ExpandLessIcon />
                   </Button>
                 </>
               )}
               <Divider />
-              <SyncPointList syncPoints={syncPoints}/>
+              <SyncPointList syncMaps={syncMap} removeSync={removeSync} startPreview={startPreview} onItemClick={selectItem}/>
             </>
           )}
         </StyledPaper>
@@ -118,4 +129,4 @@ const SyncContainer = () => {
   );
 };
 
-export default SyncContainer;
+export default React.memo(SyncContainer);
