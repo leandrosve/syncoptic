@@ -11,7 +11,7 @@ import NumberFormat from "react-number-format";
 import AccessTimeIcon from "@material-ui/icons/AccessTime";
 import formatTimeInput, { parseToNumber } from "../../../utils/formatTimeInput";
 import formatTime from "../../../utils/formatVideoTime"; 
-import { PointState, TimeInfo } from "../../../utils/SyncMap";
+import { PointState, TimeInfo } from "../../../types/SyncMap";
 import { syncMap } from "../../../data/syncMaps";
 
 interface NumberFormatCustomProps {

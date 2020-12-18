@@ -1,6 +1,6 @@
 import { Backdrop, Grid} from "@material-ui/core";
 import YouTubeContainer from "../YouTubeContainer";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import YouTube from "react-youtube";
 import PlaybackControls from "../controls/PlaybackControls";
 import AddSyncButton from "../controls/buttons/AddSyncButton";
@@ -10,21 +10,27 @@ import PreviewButton from "../controls/buttons/PreviewButton";
 import SyncContainer from "./syncs/SyncContainer";
 import useYoutubeVideo from "../../hooks/useYoutubeVideo";
 import PreviewControls from "./PreviewControls";
-import SyncMap, { PointState, TimeInfo } from "../../utils/SyncMap";
+import SyncMap, { PointState, TimeInfo } from "../../types/SyncMap";
 import UploadButton from "../controls/buttons/UploadButton";
 import useEditorPlaybackControls from "../../hooks/useEditorPlaybackControls";
 import exportToJson from "../../utils/exportToJson";
 import extractVideoIDFromURL from "../../utils/extractVideoIDFromURL";
 import URLInput from "./URLInput";
+import readJsonFile from "../../utils/readJsonFile";
+import SyncData from "../../types/SyncData";
 
 const Editor = () => {
   const reactionRef = useRef<YouTube>(null);
   const originalRef = useRef<YouTube>(null);
-  const [reactionId, setReactionId] = useState<string>("");
-  const [originalId, setOriginalId] = useState<string>("");
+  const [reactionId, setReactionId] = useState<string>("s8RIyo6Jwcgs");
+  const [originalId, setOriginalId] = useState<string>("mY_oDyqRM1As");
+
   const background = useRandomThumbnail(reactionId, originalId);
 
   const [isPreviewActive, setIsPreviewActive] = useState<boolean>(false);
+
+  const [previewStartTime, setPreviewStartTime] = useState<number>(-1);
+
 
   const reactionPlayer = useYoutubeVideo(reactionRef);
   const originalPlayer = useYoutubeVideo(originalRef);
@@ -73,12 +79,13 @@ const Editor = () => {
 
   const startPreview = useCallback(
     async (time?: number) => {
-
-      await reactionPlaybackProps.seekTo(time || 0);
-      setIsPreviewActive(true);
-      
+      console.log({startpreview:time})
+      //await reactionPlaybackProps.seekTo(time || 0);
+      setPreviewStartTime(prev => {
+        if(time === prev) {setIsPreviewActive(true); return prev} else return time || 0});
+     // setIsPreviewActive(true);
     },
-    [setIsPreviewActive, reactionPlaybackProps]
+    [setIsPreviewActive, setPreviewStartTime]
   );
 
   const handleSave = () => {
@@ -100,6 +107,27 @@ const Editor = () => {
     if(id) setOriginalId(id);
   },[setOriginalId])
 
+  const handleUpload = useCallback(async(e:React.ChangeEvent<HTMLInputElement>)=>{
+    const file = e.target.files?.[0];
+    if(file){
+      const result =(await readJsonFile(file)) as SyncData;
+      console.log(result.syncMap);
+      if(result === null || Object.keys(result).length === 0){
+        alert("something went wrong with the uploaded sync file.");
+      }
+      if(result.reactionId) setReactionId(result.reactionId);
+      if(result.originalId) setOriginalId(result.originalId);
+      if(result.syncMap) setSyncMap(new SyncMap(result.syncMap));
+      
+    } 
+  },[setReactionId, setOriginalId])
+
+  useEffect(()=>{
+    if(previewStartTime >= 0){
+      setIsPreviewActive(true);
+    }
+  },[previewStartTime])
+
   return (
     <>
       <div
@@ -109,7 +137,7 @@ const Editor = () => {
       <Grid container alignItems="stretch">
         <Grid item xs={6} style={{ padding: "10px" }}>
           <h2>Reaction</h2>
-          <URLInput onChange={handleReactionIDChange}/>
+          <URLInput onChange={handleReactionIDChange} defaultValue={"https://www.youtube.com/watch?v="+reactionId}/>
           <YouTubeContainer
             videoId={reactionId}
             playerRef={reactionRef}
@@ -118,7 +146,7 @@ const Editor = () => {
         </Grid>
         <Grid item xs={6} style={{ padding: "10px" }}>
           <h2>Original</h2>
-          <URLInput onChange={handleOriginalIDChange}/>
+          <URLInput onChange={handleOriginalIDChange} defaultValue={"https://www.youtube.com/watch?v="+originalId}/>
           <YouTubeContainer
             videoId={originalId}
             playerRef={originalRef}
@@ -131,6 +159,9 @@ const Editor = () => {
               reactionPlayer={reactionPlayer}
               originalPlayer={originalPlayer}
               syncMap={syncMap}
+              originalId={originalId}
+              reactionId={reactionId}
+              startAt={previewStartTime}
             />
           )}
         </Grid>
@@ -161,7 +192,7 @@ const Editor = () => {
         className="flexHorizontal"
         style={{ marginTop: "10px", position: "relative" }}
       >
-        <UploadButton />
+        <UploadButton onChange={handleUpload}/>
         <SaveButton onClick={handleSave} />
         <PreviewButton onClick={startPreview} />
       </div>

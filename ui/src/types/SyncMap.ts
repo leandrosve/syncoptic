@@ -36,7 +36,6 @@ export default class SyncMap extends Map<number, TimeInfo> {
     const nextKey = syncPoints[nextKeyIndex]?.[0];
     let timeout = nextKey ? nextKey - time  : -1;
     console.log({nextKey, timeout});
-
     return {key: nextKey, timeout};
   }
 

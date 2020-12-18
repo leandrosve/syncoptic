@@ -1,4 +1,4 @@
-import SyncMap, { PointState } from "../utils/SyncMap";
+import SyncMap, { PointState } from "../types/SyncMap";
 
 const syncMap = new SyncMap([
   [170, { time: 0, state: PointState.PLAYING }],

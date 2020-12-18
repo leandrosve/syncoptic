@@ -1,6 +1,6 @@
-import { YouTube } from "@material-ui/icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import useTimeMark from "./useTimeMark";
+import useVideoDuration from "./useVideoDuration";
 const useEditorPlaybackControls = (
   player: YT.Player | undefined,
   videoId: string
@@ -8,7 +8,7 @@ const useEditorPlaybackControls = (
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [previousTime, setPreviousTime] = useState<number>(0);
 
-  const [duration, setDuration] = useState<number>(0);
+  const {duration}=  useVideoDuration(videoId, player);
 
   const timeMark = useTimeMark(player, isPlaying, previousTime);
 
@@ -51,27 +51,9 @@ const useEditorPlaybackControls = (
   const forward = useCallback(async () => {
     if(player)
     seekTo(await player.getCurrentTime() + 0.1);
-  }, [seekTo]);
+  }, [seekTo, player]);
 
-  useEffect(() => {
-    if(player && videoId !== ""){
-    const interval = setInterval(async () => {
-      if(!await player.getVideoLoadedFraction()){
-        await player.seekTo(0, true);
-      }  else{
-        await player.pauseVideo();
-        await player.seekTo(0, false);
-      }  
-      const duration = (await player.getDuration()) || -1;
-      console.log(duration);
-      if (duration > -1) {
-        setDuration(duration);
-        clearInterval(interval);
-      }
-    }, 200);
-    return () => clearInterval(interval); 
-  }
-  }, [player, setDuration, videoId]);
+  
 
   return {
     isPlaying,

@@ -13,9 +13,9 @@ const useTimeMark = (player: YT.Player | undefined, active: boolean, forceUpdate
     let interval: NodeJS.Timeout;
 
     if (player && active) {
-      interval = setInterval(async () => {
-        //updateTimeMark();
-        setTimeMarker(prev => prev + 1)
+      interval = setInterval( () => {
+        updateTimeMark();
+        //setTimeMarker(prev => prev + 1)
       }, 1000);
     }
     return () => {
@@ -28,7 +28,7 @@ const useTimeMark = (player: YT.Player | undefined, active: boolean, forceUpdate
   },[player, updateTimeMark])
 
   useEffect(()=>{
-    if(forceUpdate) setTimeMarker(forceUpdate);
+    if(forceUpdate !== null && forceUpdate !== undefined) setTimeMarker(forceUpdate);
     else{
       updateTimeMark();
     }

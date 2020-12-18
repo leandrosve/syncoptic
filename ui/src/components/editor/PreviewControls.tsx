@@ -11,13 +11,11 @@ const StyledPaper = withStyles(({ palette }) => ({
     },
   }))(Paper);
 
-const PreviewControls:FunctionComponent<ControlsProps> = ({reactionPlayer, originalPlayer, syncMap}) => {
+const PreviewControls:FunctionComponent<ControlsProps> = (props) => {
     return (
             <StyledPaper className="floatingControls">
               <Controls
-                reactionPlayer={reactionPlayer}
-                originalPlayer={originalPlayer}
-                syncMap={syncMap}
+                {...props}
                 autoPlay={true}
               />
             </StyledPaper>

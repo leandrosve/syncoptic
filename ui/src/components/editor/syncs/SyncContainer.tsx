@@ -11,7 +11,7 @@ import {
 import Add from "@material-ui/icons/Add";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import SyncMap, { PointState, TimeInfo } from "../../../utils/SyncMap";
+import SyncMap, { PointState, TimeInfo } from "../../../types/SyncMap";
 import ContainerButtons from "./ContainerButtons";
 import SyncPointForm from "./SyncPointForm";
 import SyncPointList from "./SyncPointList";

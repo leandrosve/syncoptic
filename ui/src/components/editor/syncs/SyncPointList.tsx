@@ -12,7 +12,7 @@ import PauseCircleOutlineIcon from "@material-ui/icons/PauseCircleOutline";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import React, { FunctionComponent, useCallback } from "react";
 import formatTime from "../../../utils/formatVideoTime";
-import SyncMap, { PointState } from "../../../utils/SyncMap";
+import SyncMap, { PointState } from "../../../types/SyncMap";
 
 const styles = {
   list: {
